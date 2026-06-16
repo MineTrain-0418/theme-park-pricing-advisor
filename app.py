@@ -1,5 +1,8 @@
 import streamlit as st
 import anthropic
+from dotenv import load_dotenv
+
+load_dotenv()
 
 MOCK_RESPONSE = """
 ### 1. 現状の収益ポジション評価
