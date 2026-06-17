@@ -1,8 +1,12 @@
+import os
+
 import streamlit as st
-import anthropic
 from dotenv import load_dotenv
+from google import genai
 
 load_dotenv()
+
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 MOCK_RESPONSE = """
 ### 1. 現状の収益ポジション評価
@@ -130,17 +134,15 @@ def main():
                 st.markdown(MOCK_RESPONSE)
             else:
                 try:
-                    client = anthropic.Anthropic()
                     prompt = build_prompt(inputs)
 
                     def stream_response():
-                        with client.messages.stream(
-                            model="claude-sonnet-4-6",
-                            max_tokens=2048,
-                            messages=[{"role": "user", "content": prompt}],
-                        ) as stream:
-                            for text in stream.text_stream:
-                                yield text
+                        for chunk in client.models.generate_content_stream(
+                            model="gemini-2.5-flash",
+                            contents=prompt,
+                        ):
+                            if chunk.text:
+                                yield chunk.text
 
                     st.write_stream(stream_response())
                 except Exception as e:
